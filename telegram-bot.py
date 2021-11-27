@@ -58,6 +58,23 @@ def daxilol(update: Update, context: CallbackContext) -> None:
     except (IndexError, ValueError):
         update.message.reply_text('İstifadə: /qosul <elektron poçt> <parol>')
 
+
+def funksiyalar(update:Update, context: CallbackContext) -> None:
+    keyboard = [
+        [
+            InlineKeyboardButton("Havanın temperaturu", callback_data='1'),
+            InlineKeyboardButton("Havanın rütubəti", callback_data='2'),
+        ],
+        [
+            InlineKeyboardButton("Torpağın pH dəyəri", callback_data='3'),
+            InlineKeyboardButton("Torpağın nəmişliyi", callback_data='4'),
+        ],
+        [InlineKeyboardButton("Gəlir Statistikası", callback_data='5')],
+        [InlineKeyboardButton("Satış Statistikası", callback_data='6')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text("Funksiyalar",reply_markup=reply_markup)
+
 def button(update: Update, context: CallbackContext) -> None:
     """Parses the CallbackQuery and updates the message text."""
     query = update.callback_query
@@ -180,6 +197,7 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("daxilol", daxilol))
     dispatcher.add_handler(CommandHandler("gelir_statistika", gelirStatistika))
     dispatcher.add_handler(CommandHandler("satis_statistika", satisStatistika))
+    dispatcher.add_handler(CommandHandler("funksiyalar", funksiyalar))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
 
     # Start the Bot
