@@ -27,7 +27,7 @@ domain = 'https://revofood.pythonanywhere.com/'
 # since context is an unused local variable.
 # This being an example and not having context present confusing beginners,
 # we decided to have it present as context.
-def qosul(update: Update, context: CallbackContext) -> None:
+def daxilol(update: Update, context: CallbackContext) -> None:
     """Sends explanation on how to use the bot."""
     chat_id = update.message.chat_id
     keyboard = [
@@ -70,9 +70,18 @@ def button(update: Update, context: CallbackContext) -> None:
     if (query.data == '5'):
         gelirStatistika(update, context)
 
+    if (query.data == '6'):
+        satisStatistika(update, context)
 
 def gelirStatistika(update: Update, context: CallbackContext) -> None:
-    chat_id = update.message.chat_id
+    if update.message is not None:
+        chat_id = update.message.chat.id
+        print(update.message.chat.id)
+    elif update.callback_query is not None:
+        # from a callback message
+        chat_id = update.callback_query.message.chat.id
+        print(update.callback_query.message.chat.id)
+    # chat_id = update.message.chat_id
     try:
         response = requests.get(domain + 'api/income/', headers={'Authorization' : 'Token '+ user_tokens[chat_id]})
     
@@ -81,12 +90,27 @@ def gelirStatistika(update: Update, context: CallbackContext) -> None:
             + 'Son 1 həftədəki gəliriniz: '+str(response.json()[2]['last_one_week'])+'₼\n' \
             + 'Son 1 aydakı gəliriniz: '+str(response.json()[3]['last_one_month'])+'₼\n'
         
-        update.message.reply_text(gs)
+        if update.message is not None:
+            update.message.reply_text(gs)
+        elif update.callback_query is not None:
+            update.callback_query.message.reply_text(gs)
+
+        # update.message.reply_text(gs)
     except KeyError:
-        update.message.reply_text('Hesabınıza daxil olmamısınız!')
+        if update.message.chat_id is not None:
+            update.message.reply_text('Hesabınıza daxil olmamısınız!')
+        elif update.callback_query is not None:
+            update.callback_query.message.reply_text('Hesabınıza daxil olmamısınız!')
+        
 
 def satisStatistika(update: Update, context: CallbackContext) -> None:
-    chat_id = update.message.chat_id
+    if update.message is not None:
+        chat_id = update.message.chat.id
+        print(update.message.chat.id)
+    elif update.callback_query is not None:
+        # from a callback message
+        chat_id = update.callback_query.message.chat.id
+        print(update.callback_query.message.chat.id)
     try:
         response = requests.get(domain + 'api/sellings/', headers={'Authorization' : 'Token '+ user_tokens[chat_id]})
 
@@ -95,9 +119,15 @@ def satisStatistika(update: Update, context: CallbackContext) -> None:
             + 'Son 1 həftədəki satışlarınız: '+str(response.json()[2]['last_one_week'])+'kq\n' \
             + 'Son 1 aydakı satışlarınız: '+str(response.json()[3]['last_one_month'])+'kq\n'
         
-        update.message.reply_text(ss)
+        if update.message is not None:
+            update.message.reply_text(ss)
+        elif update.callback_query is not None:
+            update.callback_query.message.reply_text(ss)
     except KeyError:
-        update.message.reply_text('Hesabınıza daxil olmamısınız!')
+        if update.message.chat_id is not None:
+            update.message.reply_text('Hesabınıza daxil olmamısınız!')
+        elif update.callback_query is not None:
+            update.callback_query.message.reply_text('Hesabınıza daxil olmamısınız!')
 
 def remove_job_if_exists(name: str, context: CallbackContext) -> bool:
     """Remove job with given name. Returns whether job was removed."""
@@ -147,7 +177,7 @@ def main() -> None:
     dispatcher = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dispatcher.add_handler(CommandHandler("qosul", qosul))
+    dispatcher.add_handler(CommandHandler("daxilol", daxilol))
     dispatcher.add_handler(CommandHandler("gelir_statistika", gelirStatistika))
     dispatcher.add_handler(CommandHandler("satis_statistika", satisStatistika))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
@@ -159,6 +189,7 @@ def main() -> None:
     # SIGABRT. This should be used most of the time, since start_polling() is
     # non-blocking and will stop the bot gracefully.
     updater.idle()
+
 
 
 if __name__ == '__main__':
