@@ -1,2 +1,4 @@
-# bfh-2021
-Baku Food Hackathon 2021 - Revofood Telegram bot
+# Baku Food Hackhathon 2021
+## Team Istechlal
+Revofood Telegram Bot and ESP32 firmware
+
