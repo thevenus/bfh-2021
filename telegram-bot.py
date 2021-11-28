@@ -5,10 +5,11 @@
 import logging
 import requests
 from requests.auth import HTTPBasicAuth
+import json
 
 user_tokens = {}
 
-from telegram import Update, user, InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import Update, update, user, InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import UPDATE_CHOSEN_INLINE_RESULT
 from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler
 
@@ -21,12 +22,6 @@ logger = logging.getLogger(__name__)
 
 domain = 'https://revofood.pythonanywhere.com/'
 
-# Define a few command handlers. These usually take the two arguments update and
-# context. Error handlers also receive the raised TelegramError object in error.
-# Best practice would be to replace context with an underscore,
-# since context is an unused local variable.
-# This being an example and not having context present confusing beginners,
-# we decided to have it present as context.
 def daxilol(update: Update, context: CallbackContext) -> None:
     """Sends explanation on how to use the bot."""
     chat_id = update.message.chat_id
@@ -35,12 +30,8 @@ def daxilol(update: Update, context: CallbackContext) -> None:
             InlineKeyboardButton("Havanın temperaturu", callback_data='1'),
             InlineKeyboardButton("Havanın rütubəti", callback_data='2'),
         ],
-        [
-            InlineKeyboardButton("Torpağın pH dəyəri", callback_data='3'),
-            InlineKeyboardButton("Torpağın nəmişliyi", callback_data='4'),
-        ],
-        [InlineKeyboardButton("Gəlir Statistikası", callback_data='5')],
-        [InlineKeyboardButton("Satış Statistikası", callback_data='6')],
+        [InlineKeyboardButton("Gəlir Statistikası", callback_data='3')],
+        [InlineKeyboardButton("Satış Statistikası", callback_data='4')],
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -83,11 +74,17 @@ def button(update: Update, context: CallbackContext) -> None:
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
 
     # query.edit_message_text(text=f"Selected option: {query.data}")
+
+    if (query.data == '1'):
+        temp(update, context)
+
+    if (query.data == '2'):
+        rutubet(update, context)
     
-    if (query.data == '5'):
+    if (query.data == '3'):
         gelirStatistika(update, context)
 
-    if (query.data == '6'):
+    if (query.data == '4'):
         satisStatistika(update, context)
 
 def gelirStatistika(update: Update, context: CallbackContext) -> None:
@@ -146,49 +143,47 @@ def satisStatistika(update: Update, context: CallbackContext) -> None:
         elif update.callback_query is not None:
             update.callback_query.message.reply_text('Hesabınıza daxil olmamısınız!')
 
-def remove_job_if_exists(name: str, context: CallbackContext) -> bool:
-    """Remove job with given name. Returns whether job was removed."""
-    current_jobs = context.job_queue.get_jobs_by_name(name)
-    if not current_jobs:
-        return False
-    for job in current_jobs:
-        job.schedule_removal()
-    return True
+def temp(update: Update, context: CallbackContext) -> None:
+    if update.message is not None:
+        chat_id = update.message.chat.id
+    elif update.callback_query is not None:
+        chat_id = update.callback_query.message.chat.id
+        response = requests.get(domain + 'api/rest-auth/user/', headers={'Authorization' : 'Token '+ user_tokens[chat_id]})
+        
 
+    print(response.json())
+    new_response = requests.get(domain + 'api/hardwareDataGet/'+str(response.json()['pk'])+'/')
+    print(new_response.json()[-1]['sent_data'])
 
-def set_timer(update: Update, context: CallbackContext) -> None:
-    """Add a job to the queue."""
-    chat_id = update.message.chat_id
-    try:
-        # args[0] should contain the time for the timer in seconds
-        due = int(context.args[0])
-        if due < 0:
-            update.message.reply_text('Sorry we can not go back to future!')
-            return
+    if update.message is not None:
+            update.message.reply_text('Havanın temperaturu: '+str(json.loads(new_response.json()[-1]['sent_data'])["temp"])+'C')
+    elif update.callback_query is not None:
+        update.callback_query.message.reply_text('Havanın temperaturu: '+str(json.loads(new_response.json()[-1]['sent_data'])["temp"])+'C')
+    # /api/hardwareDataGet/{user_id}/
+    # update.message.reply_text('Hesabınıza daxil oldunuz!', reply_markup=reply_markup)
+    # user_tokens[chat_id] = response.json()['key']
 
-        job_removed = remove_job_if_exists(str(chat_id), context)
-        context.job_queue.run_once(alarm, due, context=chat_id, name=str(chat_id))
+def rutubet(update: Update, context: CallbackContext) -> None:
+    if update.message is not None:
+        chat_id = update.message.chat.id
+    elif update.callback_query is not None:
+        chat_id = update.callback_query.message.chat.id
+        response = requests.get(domain + 'api/rest-auth/user/', headers={'Authorization' : 'Token '+ user_tokens[chat_id]})
+        
 
-        text = 'Timer successfully set!'
-        if job_removed:
-            text += ' Old one was removed.'
-        update.message.reply_text(text)
+    print(response.json())
+    new_response = requests.get(domain + 'api/hardwareDataGet/'+str(response.json()['pk'])+'/')
+    print(new_response.json()[-1]['sent_data'])
 
-    except (IndexError, ValueError):
-        update.message.reply_text('Usage: /set <seconds>')
-
-
-def unset(update: Update, context: CallbackContext) -> None:
-    """Remove the job if the user changed their mind."""
-    chat_id = update.message.chat_id
-    job_removed = remove_job_if_exists(str(chat_id), context)
-    text = 'Timer successfully cancelled!' if job_removed else 'You have no active timer.'
-    update.message.reply_text(text)
+    if update.message is not None:
+            update.message.reply_text('Havanın rütubəti: '+str(json.loads(new_response.json()[-1]['sent_data'])["humidity"]))
+    elif update.callback_query is not None:
+        update.callback_query.message.reply_text('Havanın rütubəti: '+str(json.loads(new_response.json()[-1]['sent_data'])["humidity"]))
 
 def main() -> None:
     """Run bot."""
     # Create the Updater and pass it your bot's token.
-    updater = Updater("2134198856:AAFNng4gwIyLu3KiTKcc_hsEFgXAVeqVzyE")
+    updater = Updater("TOKEN")
 
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
@@ -198,6 +193,8 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("gelir_statistika", gelirStatistika))
     dispatcher.add_handler(CommandHandler("satis_statistika", satisStatistika))
     dispatcher.add_handler(CommandHandler("funksiyalar", funksiyalar))
+    dispatcher.add_handler(CommandHandler("temp", temp))
+    dispatcher.add_handler(CommandHandler("rutubet", rutubet))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
 
     # Start the Bot
@@ -207,8 +204,6 @@ def main() -> None:
     # SIGABRT. This should be used most of the time, since start_polling() is
     # non-blocking and will stop the bot gracefully.
     updater.idle()
-
-
 
 if __name__ == '__main__':
     main()
