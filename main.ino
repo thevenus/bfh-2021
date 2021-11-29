@@ -23,7 +23,7 @@ TinyGPSPlus gps;
 unsigned long lastTime = 0;
 unsigned long timerDelay = 5000;
 
-// http post request server
+// http request server
 const char* serverName = "http://revofood.pythonanywhere.com/api/hardwareDataPost/";
 
 const char* ssid = "SSID";
