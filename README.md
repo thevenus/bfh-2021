@@ -11,11 +11,14 @@
 Main objective of our project was to implement different sensors to fields to get data about humidity, temprature, pH value of the soil, as well as the geolocation of the field. It would help us to determine if this product is (vegetables, fruits and so on.) organic or not. On top of the hardware we have created an e-commerce website for farmers to sell their products on the platform and for customers to buy products online. The data obtained from sensors would later help to build trust between buyers and farmers about the product. Customers can see the soil data coming from different sensors and parts of the field in the page of product in a table format:
 
 <p align="center">
-  <img src="screenshots/map-table.png" style="width:500px"/>
+  <img src="screenshots/map-table.png" style="width:500px"/>  
 </p>
 
-
-
 As it can be seen from the image, there are different colors in map and percentages.  The percantages indicate humidity. If humidity is beteen 0 and 50, the color will be red and its shades. When humidity is more than 50 the color will be blue and its shades.
+
+Our Telegram Bot can be used to get the necessary data from the server easily. Here is a screenshot of the telegram bot:
+<p align="center">
+  <img src="screenshots/telegram-bot.gif" style="width:500px"/>
+</p>
 
 You can find source code for the web application of this project via <a href="https://github.com/KananBagaliyev/bfh-2021">this link</a>.
