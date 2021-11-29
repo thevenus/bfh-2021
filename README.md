@@ -13,5 +13,4 @@ Main objective of this project was to implement different sensors to the sown ar
 
 ![this data](https://user-images.githubusercontent.com/55328259/143814164-eaf6365b-df27-4f96-abbe-46642979516b.png)
 
-
 As it is seen for the image, there are different colors in map and percentages. Due to it is the prototype we have only used humidity sensor to get data form hardware and display it on app. The percantages indicate humidity. If humidity is beteen 0 and 50, the color will be red and its shades. Ühen humidity is more than 50 the color will be blue and its shades.
